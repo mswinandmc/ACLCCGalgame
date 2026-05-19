@@ -1,7 +1,7 @@
 ﻿## This file contains options that can be changed to customize your game.
 ##
-## Lines beginning with two '#' marks are comments, and you shouldn't uncomment
-## them. Lines beginning with a single '#' mark are commented-out code, and you
+## Lines beginning with two "#" marks are comments, and you shouldn't uncomment
+## them. Lines beginning with a single "#" mark are commented-out code, and you
 ## may want to uncomment them when appropriate.
 
 
@@ -121,7 +121,7 @@ define config.window_hide_transition = Dissolve(.25)
 ## Controls the default text speed. The default, 0, is infinite, while any other
 ## number is the number of characters per second to type out.
 
-default preferences.text_cps = 15
+default preferences.text_cps = 24
 
 
 ## The default auto-forward delay. Larger numbers lead to longer waits, with 0
@@ -179,22 +179,22 @@ init python:
 
     ## Classify files as None to exclude them from the built distributions.
 
-    build.classify('**~', None)
-    build.classify('**.bak', None)
-    build.classify('**/.**', None)
-    build.classify('**/#**', None)
-    build.classify('**/thumbs.db', None)
+    build.classify("**~", None)
+    build.classify("**.bak", None)
+    build.classify("**/.**", None)
+    build.classify("**/#**", None)
+    build.classify("**/thumbs.db", None)
 
-    ## To archive files, classify them as 'archive'.
+    ## To archive files, classify them as "archive".
 
-    # build.classify('game/**.png', 'archive')
-    # build.classify('game/**.jpg', 'archive')
+    # build.classify("game/**.png", "archive")
+    # build.classify("game/**.jpg", "archive")
 
     ## Files matching documentation patterns are duplicated in a mac app build,
     ## so they appear in both the app and the zip file.
 
-    build.documentation('*.html')
-    build.documentation('*.txt')
+    build.documentation("*.html")
+    build.documentation("*.txt")
 
 
 ## A Google Play license key is required to download expansion files and perform

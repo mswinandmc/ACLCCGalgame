@@ -119,7 +119,7 @@ screen say(who, what):
 
 ## Make the namebox available for styling through the Character object.
 init python:
-    config.character_id_prefixes.append('namebox')
+    config.character_id_prefixes.append("namebox")
 
 style window is default
 style say_label is default
@@ -253,13 +253,13 @@ screen quick_menu():
             yalign 1.0
 
             textbutton _("Back") action Rollback()
-            textbutton _("History") action ShowMenu('history')
+            textbutton _("History") action ShowMenu("history")
             textbutton _("Skip") action Skip() alternate Skip(fast=True, confirm=True)
             textbutton _("Auto") action Preference("auto-forward", "toggle")
-            textbutton _("Save") action ShowMenu('save')
+            textbutton _("Save") action ShowMenu("save")
             textbutton _("Q.Save") action QuickSave()
             textbutton _("Q.Load") action QuickLoad()
-            textbutton _("Prefs") action ShowMenu('preferences')
+            textbutton _("Prefs") action ShowMenu("preferences")
 
 
 ## This code ensures that the quick_menu screen is displayed in-game, whenever
@@ -1285,7 +1285,7 @@ screen notify(message):
     frame at notify_appear:
         text "[message!tq]"
 
-    timer 3.25 action Hide('notify')
+    timer 3.25 action Hide("notify")
 
 
 transform notify_appear:
