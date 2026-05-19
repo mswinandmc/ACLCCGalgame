@@ -1,6 +1,13 @@
 # 向导 by 祐荽
 
 
+init python:
+    import os
+    import time
+    import string
+    import unicodedata
+
+
 label guide_naming_start:
     
     scene black with fade
@@ -32,7 +39,21 @@ label guide_naming_start:
     qqq "抱歉，{w=0.25}我早该在这之前准备好文案的，{w=0.25}我总是这样。"
     qqq "算了，{w=0.25}既然如此，{w=0.5}不妨先取个名字？"
 
-    "↓试着给自己想个名字？{w=1.0}{nw}"
+    "↓试着给自己想个名字？{nw}"
+    python:
+        start_time = time.time()
+    default player_input = ""
+    call screen volatile_input_screen("↓试着给自己想个名字？", 1)
+    $ entered = _return
+    python:
+        delta_time = time.time() - start_time
+
+    # 否则，如果输入名字所花费的时间短于一秒：
+    if entered == "Entered":
+        $ name_mc = player_input
+        qqq "哇，{w=0.25}你的速度可真快，只用了[delta_time:.3f]秒就{...}\n{...}你大概只是乱敲了下键盘吧，{w=0.25}我猜。"
+        qqq "也许你是个速通玩家，{w=0.5}谁知道呢？\n{w=1.0}我反正不明白为什么一个galgame也会有人尝试速通。"
+        jump naming_entered
 
     qqq "——啊，{w=0.25}不好意思，{w=0.5}我得提醒你一下。"
     qqq "尽管这个游戏理论上是完全离线的，{w=0.5}但是——"
@@ -56,13 +77,9 @@ label guide_naming_loop:
 
     "↓试着给自己想个名字？{nw}"
     python:
-        import time, string, unicodedata, os
-
-        start_time = time.time()
         name_mc = renpy.input(_("↓试着给自己想个名字？")).strip()
-        end_time = time.time()
-        delta_time = end_time - start_time
 
+label guide_naming_entered:
     python:
         currentuser = ""
         for name in ("LOGNAME", "USER", "LNAME", "USERNAME"):
@@ -109,14 +126,8 @@ label guide_naming_loop:
                         $ persistent.name_mc = name_mc
                         return
     
-    # 否则，如果输入名字所花费的时间短于一秒：
-    elif delta_time < 1:
-        qqq "哇，{w=0.25}你的速度可真快，只用了[delta_time:.3f]秒就{...}\n{...}你大概只是乱敲了下键盘吧，{w=0.25}我猜。"
-        qqq "也许你是个速通玩家，{w=0.5}谁知道呢？\n{w=1.0}我反正不明白为什么一个galgame也会有人尝试速通。"
-        jump guide_naming_done
-    
-    # 否则，如果输入的名字是administrator等管理员用户名：
-    elif name_mc.lower() in ("admin", "administrator", "system", "root", "wheel"):
+    # 否则，如果输入的名字是administrator等管理员用户名，或当前系统用户名：
+    elif name_mc.lower() in ("admin", "administrator", "system", "root", "wheel") or name_mc == currentuser:
         qqq "{......}我不明白。"
         qqq "我应该没有调用获取系统账户名称的API吧{......}"
         qqq "难道说你觉得这样做就能获得什么“{green}管理员权限{/green}”之类的？"

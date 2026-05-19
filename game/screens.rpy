@@ -196,6 +196,37 @@ style input:
     xalign gui.dialogue_text_xalign
     xmaximum gui.dialogue_width
 
+screen volatile_input_screen(prompt, duration):
+    style_prefix "input"
+    timer duration action Function(close_input_screen)
+
+    window:
+
+        vbox:
+            xanchor gui.dialogue_text_xalign
+            xpos gui.dialogue_xpos
+            xsize gui.dialogue_width
+            ypos gui.dialogue_ypos
+
+            text prompt style "input_prompt"
+            input:
+                id "input"
+                value VariableInputValue("player_input")
+                action Return("Entered")
+
+style input_prompt is default
+
+style input_prompt:
+    xalign gui.dialogue_text_xalign
+    properties gui.text_properties("input_prompt")
+
+style input:
+    xalign gui.dialogue_text_xalign
+    xmaximum gui.dialogue_width
+
+init python:
+    def close_input_screen():
+        return "Timeout"
 
 ## Choice screen ###############################################################
 ##
