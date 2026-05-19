@@ -158,7 +158,7 @@ label ut_naming:
         $ name_mc = persistent.name_mc
         mc "A name has already been chosen."
     else:
-        call ut_naming_loop
+        call ut_naming_loop from _call_ut_naming_loop
     
     return
 
