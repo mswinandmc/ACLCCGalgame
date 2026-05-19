@@ -43,15 +43,15 @@ label guide_naming_start:
     python:
         start_time = time.time()
     default player_input = ""
-    call screen volatile_input_screen("↓试着给自己想个名字？", 1)
+    call screen volatile_input_screen("↓试着给自己想个名字？", 1.0)
     $ entered = _return
     python:
         delta_time = time.time() - start_time
+    $ renpy.block_rollback()
 
-    # 否则，如果输入名字所花费的时间短于一秒：
+    # 如果在一秒内成功地输入了名字：
     if entered == "Entered":
-        $ name_mc = player_input
-        qqq "哇，{w=0.25}你的速度可真快，只用了[delta_time:.3f]秒就{...}\n{...}你大概只是乱敲了下键盘吧，{w=0.25}我猜。"
+        qqq "哇，{w=0.25}你的速度可真快，只用了[delta_time:.3f]秒就{......}\n你大概只是乱敲了下键盘吧，{w=0.25}我猜。"
         qqq "也许你是个速通玩家，{w=0.5}谁知道呢？\n{w=1.0}我反正不明白为什么一个galgame也会有人尝试速通。"
         jump guide_naming_entered
 
@@ -77,9 +77,11 @@ label guide_naming_loop:
 
     "↓试着给自己想个名字？{nw}"
     python:
-        name_mc = renpy.input(_("↓试着给自己想个名字？")).strip()
+        player_input = renpy.input(_("↓试着给自己想个名字？")).strip()
+    jump guide_naming_entered
 
 label guide_naming_entered:
+
     python:
         currentuser = ""
         for name in ("LOGNAME", "USER", "LNAME", "USERNAME"):
@@ -88,11 +90,11 @@ label guide_naming_entered:
                 currentuser = user
     
     # 如果不输入名字，或者输入的名字全部为空白字符：
-    if not name_mc:
+    if not player_input:
         qqq "怎么，{w=0.25}你觉得这样会触发什么彩蛋吗？\n{w=1.0}还是说你叫棍母？\n{w=1.0}又或者你是那个睿智的国王？{w=0.5}名字只有聪明人才能看见？"
         qqq "{......}"
         qqq "咳咳，{w=0.25}我开玩笑的。"
-        qqq "总有些人不太擅长取名字，{w=0.5}我也是。"
+        qqq "总有些人不太擅长取名字，{w=0.5}我也一样。"
         qqq "或者他们就喜欢主角的名字，{w=0.5}也许是为了沉浸感？"
         qqq "不过这样的话，{w=0.5}我就得替你想一个名字了。\n{w=1.0}这可真是个艰巨的任务。"
         qqq "{......}"
@@ -120,61 +122,70 @@ label guide_naming_entered:
                         $ name_mc = "殷夏"
                         jump guide_naming_done
                     "我再想想......": 
-                        qqq "什么，{w=0.5}这都不满意吗？\n{w=1.0}我明白了，{w=0.5}你莫不是来消遣洒家？"
-                        qqq "我已经没有耐心了，{w=0.25}你就叫玩家吧，{w=0.25}我不会给你选择的机会了。"
                         $ name_mc = "玩家"
                         $ persistent.name_mc = name_mc
+                        $ renpy.block_rollback()
+                        qqq "什么，{w=0.5}这都不满意吗？\n{w=1.0}我明白了，{w=0.5}你莫不是来消遣洒家？"
+                        qqq "我已经没有耐心了，{w=0.25}你就叫玩家吧，{w=0.25}我不会给你选择的机会了。"
                         return
     
-    # 否则，如果输入的名字是administrator等管理员用户名，或当前系统用户名：
-    elif name_mc.lower() in ("admin", "administrator", "system", "root", "wheel") or name_mc == currentuser:
+    # 否则，如果输入的名字是administrator等管理员用户名：
+    elif player_input.lower() in ("admin", "administrator", "system", "root", "wheel"):
         qqq "{......}我不明白。"
         qqq "我应该没有调用获取系统账户名称的API吧{......}"
         qqq "难道说你觉得这样做就能获得什么“{green}管理员权限{/green}”之类的？"
         qqq "谁知道呢，{w=0.5}说不定某次更新之后作者就会为这个加点什么？"
+        $ name_mc = player_input
         jump guide_naming_confirm
     
     # 否则，如果输入的名字是当前系统用户名：
-    elif name_mc == currentuser:
+    elif player_input == currentuser:
         qqq "唔{...}这好像是你系统账户的名字。\n{w=1.0}你不会所有地方都会用一样的名字吧？"
         qqq "没什么好说的，你喜欢就好。"
+        $ name_mc = player_input
         jump guide_naming_confirm
     
     # 否则，如果输入的名字是qwq/awa等：
-    elif name_mc.lower() in ("qwq", "awa", "uwu", "xwx"):
-        qqq "[name_mc]"
+    elif player_input.lower() in ("qwq", "awa", "uwu", "xwx"):
+        qqq "[player_input]"
+        $ name_mc = player_input
         jump guide_naming_confirm
     
     # 否则，如果输入的名字含有特殊符号（通过检查Unicode字符分类判断）：
-    elif any(unicodedata.category(c) in ("So", "Zl", "Zp", "Cc", "Cf", "Cs", "Co", "Cn") for c in name_mc):
+    elif any(unicodedata.category(c) in ("So", "Zl", "Zp", "Cc", "Cf", "Cs", "Co", "Cn") for c in player_input):
         qqq "虽然说输入框能支持，{w=0.25}但是{...}\n{...}你取个这样的名字，{w=0.5}我该怎么念呢？"
         qqq "难道说你在聊天框里塞了颜文字？{w=1.0}我的程序检测不出来。"
+        $ name_mc = player_input
         jump guide_naming_confirm
 
     # 否则，如果输入的名字长度大于20个字符：
-    elif len(name_mc) > 20:
+    elif len(player_input) > 20:
         qqq "哇，{w=0.25}这可真是个很长的名字。\n{w=1.0}不过这么长的名字，{w=0.5}我可不能确定UI能不能适配。\n{w=1.0}也许换个名字是个更好的选择？"
         jump guide_naming_loop
 
     # 否则，如果输入的名字长度小于3字节：
-    elif len(bytes(name_mc, encoding="utf-8")) < 3:
-        qqq "看来你并不擅长取名字，{w=0.5}我也一样。\n{w=1.0}没关系，{w=0.25}在这里，{w=0.25}名字并不重要。"
+    elif len(bytes(player_input, encoding="utf-8")) < 3:
+        qqq "或许你不太擅长取名字，{w=0.5}我也一样。\n{w=1.0}没关系，{w=0.25}在这里，{w=0.25}名字并不重要。"
+        $ name_mc = player_input
         jump guide_naming_confirm
     
     # 否则，如果输入的名字是纯数字：
-    elif all(c in string.digits for c in name_mc):
+    elif all(c in string.digits for c in player_input):
         qqq "纯数字吗，{w=0.5}真是无趣，{w=0.5}像是系统分配的一样。"
+        $ name_mc = player_input
         jump guide_naming_confirm
     
     # 否则，如果输入的名字是纯英文字符（A-Z, a-z, 0-9）：
-    elif all(c in string.digits + string.ascii_letters for c in name_mc):
+    elif all(c in string.digits + string.ascii_letters for c in player_input):
         qqq "英文字符，{w=0.5}很聪明的选择。"
         qqq "虽然输入框可以支持中文，{w=0.5}但是纯英文的兼容性往往更好。\n{w=1.0}看来你对这方面的知识的确有一点了解。"
+        $ name_mc = player_input
         jump guide_naming_confirm
     
     # 否则（以上条件均没能满足）：
     else:
-        # yangsy "（此处应为[name_qqq]对玩家所取的名称（[name_mc]）的默认评价）"
+        # yangsy "（此处应为[name_qqq]对玩家所取的名称（[player_input]）的默认评价）"
+        $ name_mc = player_input
         jump guide_naming_confirm
 
 
@@ -195,6 +206,7 @@ label guide_naming_confirm:
 label guide_naming_done:
 
     $ persistent.name_mc = name_mc
+    $ renpy.block_rollback()
     qqq "好的，{w=0.25}看来你决定好自己叫什么了。"
     qqq "不过我还是叫你玩家吧，{w=0.5}我还是习惯这么叫你。"
     qqq "——啊，{w=0.25}好奇我的名字吗，{w=0.5}我想这并不重要。"
@@ -235,6 +247,7 @@ label ut_naming_loop:
         mc "Is this name correct?{fast}"
         "Yes":
             $ persistent.name_mc = name_mc
+            $ renpy.block_rollback()
             return
         "No":
             jump ut_naming_loop
